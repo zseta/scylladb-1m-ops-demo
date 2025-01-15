@@ -11,6 +11,8 @@ import {
   Spinner,
 } from 'react-bootstrap';
 import { io } from 'socket.io-client';
+import logo from './assets/images/scylla-logo.svg';
+import mascot from './assets/images/scylladb-mascot-cloud.svg';
 
 // React Application Code
 export const App = () => {
@@ -361,7 +363,7 @@ export const App = () => {
     <div className="controls gap-4">
       <div className="top-nav d-flex align-items-center">
         <img
-          src="./img/scylla-logo.svg"
+          src={logo}
           alt="ScyllaDB"
         />
         <div className="flex-grow-1"></div>
@@ -466,7 +468,7 @@ export const App = () => {
             <Card>
               <Card.Body className="section-about">
                 <img
-                  src="./img/scylladb-mascot-cloud.svg"
+                  src={mascot}
                   alt=""
                 />
                 <h2>
