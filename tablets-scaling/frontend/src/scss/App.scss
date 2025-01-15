@@ -51,8 +51,6 @@ body {
     }
   }
 
-  .controls {
-  }
   .grafana {
     display: flex;
     flex-direction: column;
@@ -138,8 +136,6 @@ body {
     display: flex;
     padding: 0 $spacer-sm;
     gap: $spacer;
-    .desc {
-    }
 
     .img {
       width: 250px;
@@ -182,9 +178,6 @@ body {
       align-self: flex-end;
     }
   }
-}
-
-.main-container {
 }
 
 .lead {
