@@ -1,7 +1,11 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import './index.css';
-import App from './App.tsx';
+import './scss/App.scss';
+import { App } from './App';
+import './assets/fonts/fonticon.ttf';
+import './assets/fonts/RobotoFlex.ttf';
+import './assets/fonts/RobotoMono.ttf';
+import './assets/fonts/RobotoMono-Italic.ttf';
 
 const rootDiv = document.getElementById('root');
 
