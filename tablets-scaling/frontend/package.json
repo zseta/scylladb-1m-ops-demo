@@ -8,7 +8,9 @@
     "build": "tsc -b && vite build",
     "type-check": "tsc --noEmit",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "lint-staged": "lint-staged",
+    "preview": "vite preview",
+    "prepare": "cd ../../ && husky tablets-scaling/frontend/.husky"
   },
   "dependencies": {
     "react": "^18.3.1",
@@ -23,6 +25,8 @@
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.16",
     "globals": "^15.14.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.3.0",
     "prettier": "^3.4.2",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.18.2",
