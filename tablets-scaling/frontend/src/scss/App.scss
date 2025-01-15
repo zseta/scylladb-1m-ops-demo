@@ -322,6 +322,7 @@ body {
 .btn:not(.btn-light) {
   color: $white;
 }
+
 .form-control {
   &.blend-input {
     text-align: center;
@@ -344,7 +345,7 @@ body {
       margin: 0;
     }
     &[type='number'] {
-      -moz-appearance: textfield;
+      appearance: textfield;
     }
   }
 }
