@@ -4,8 +4,6 @@ import {
   useEffect,
   useState,
   useRef,
-  createContext,
-  useContext,
 } from 'react';
 import {
   Tabs,
@@ -16,9 +14,11 @@ import {
   Form,
   Spinner,
 } from 'react-bootstrap';
-import { io, type Socket } from 'socket.io-client';
+import { io } from 'socket.io-client';
 import { Icon } from '@/components/Icon';
 import { Slider } from '@/components/Slider';
+import { useSocketContext } from '@/context/socket';
+import { SocketProvider } from '@/context/SocketProvider';
 import logo from '@/assets/images/scylla-logo.svg';
 import mascot from '@/assets/images/scylladb-mascot-cloud.svg';
 import {
@@ -27,43 +27,12 @@ import {
   objectHasProperty,
 } from '@/util/guard';
 
-interface SocketContext {
-  readonly socketRef: React.MutableRefObject<Socket | null>;
-  readonly emitEvent: (eventName: string) => void;
-}
-
-const socketContext = createContext<SocketContext | null>(null);
-
-export const App = () => {
-  const socketRef = useRef<Socket | null>(null);
-
-  const emitEvent = (eventName: string) => {
-    console.log(`Emitting event: ${eventName}`);
-
-    if (socketRef.current) {
-      socketRef.current.emit(eventName);
-    }
-  };
-
-  return (
-    <socketContext.Provider value={{ socketRef: socketRef, emitEvent }}>
-      <MainContainer />
-      <GrafanaContainer />
-    </socketContext.Provider>
-  );
-};
-
-const useSocketContext = (): SocketContext => {
-  const context = useContext(socketContext);
-
-  if (context === null) {
-    throw new Error(
-      'useSocketRefContext must be used within socketRefContext.Provider'
-    );
-  } else {
-    return context;
-  }
-};
+export const App = () => (
+  <SocketProvider>
+    <MainContainer />
+    <GrafanaContainer />
+  </SocketProvider>
+);
 
 const ConsoleOutput = () => {
   const { socketRef } = useSocketContext();
