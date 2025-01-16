@@ -1,4 +1,10 @@
-import { useEffect, useState, useRef } from 'react';
+import {
+  type ChangeEvent,
+  type ReactNode,
+  useEffect,
+  useState,
+  useRef,
+} from 'react';
 import {
   Tabs,
   Tab,
@@ -10,24 +16,27 @@ import {
   Col,
   Spinner,
 } from 'react-bootstrap';
-import { io } from 'socket.io-client';
+import { io, type Socket } from 'socket.io-client';
 import logo from './assets/images/scylla-logo.svg';
 import mascot from './assets/images/scylladb-mascot-cloud.svg';
+import {
+  allRecordValuesAreStrings,
+  isObject,
+  objectHasProperty,
+} from './util/guard';
 
-// React Application Code
 export const App = () => {
-  // Use a ref to persist the socket instance across renders
-  const socket = useRef(null);
+  const socketRef = useRef<Socket | null>();
 
-  // Emit events when buttons are clicked
-  const emitEvent = (eventName) => {
+  const emitEvent = (eventName: string) => {
     console.log(`Emitting event: ${eventName}`);
-    if (socket.current) {
-      socket.current.emit(eventName);
+
+    if (socketRef.current) {
+      socketRef.current.emit(eventName);
     }
   };
 
-  const handleClusterToggle = (isRunning) => {
+  const handleClusterToggle = (isRunning: boolean) => {
     if (isRunning) {
       console.log('Loader Started');
     } else {
@@ -35,7 +44,7 @@ export const App = () => {
     }
   };
 
-  const handleLoaderToggle = (isRunning) => {
+  const handleLoaderToggle = (isRunning: boolean) => {
     if (isRunning) {
       console.log('Loader Started');
     } else {
@@ -45,21 +54,31 @@ export const App = () => {
 
   const ConsoleOutput = () => {
     const [output, setOutput] = useState('[Welcome to ScyllaDB Tech Demo]');
-    const outputRef = useRef(null);
+    const outputRef = useRef<HTMLPreElement | null>(null);
 
     useEffect(() => {
       // Initialize the socket connection
-      socket.current = io();
+      socketRef.current = io();
 
       // Set up event listeners
-      socket.current.on('playbook_output', (data) => {
-        setOutput((prevOutput) => prevOutput + data.output);
-        console.log(data.output);
+      socketRef.current.on('playbook_output', (data: unknown) => {
+        if (
+          isObject(data) &&
+          objectHasProperty(data, 'output') &&
+          typeof data['output'] === 'string'
+        ) {
+          const output = data['output'];
+
+          setOutput((prevOutput) => prevOutput + output);
+          console.log(output);
+        } else {
+          console.error('Invalid data received:', data);
+        }
       });
 
       // Cleanup socket connection on component unmount
       return () => {
-        socket.current.disconnect();
+        socketRef.current?.disconnect();
       };
     }, []);
 
@@ -81,16 +100,27 @@ export const App = () => {
     );
   };
 
-  // Scenario Card Component
-  const ScenarioCard = ({ icon, title, description, collapseId, onClick }) => {
+  interface ScenarioCardProps {
+    readonly icon: string;
+    readonly title: string;
+    readonly description: string;
+    readonly collapseId: string;
+    readonly onClick: () => void;
+  }
+
+  const ScenarioCard = ({
+    icon,
+    title,
+    description,
+    collapseId,
+    onClick,
+  }: ScenarioCardProps) => {
     const [open, setOpen] = useState(true);
     const [runState, setRunState] = useState(0);
 
     const handleButtonClick = () => {
       setRunState(2);
-      if (onClick) {
-        onClick(); // Call the parent-provided onClick if it exists
-      }
+      onClick();
     };
 
     return (
@@ -98,7 +128,9 @@ export const App = () => {
         <div className="desc">
           <a
             className="d-block flex-grow-1"
-            onClick={() => setOpen(!open)}
+            onClick={() => {
+              setOpen(!open);
+            }}
             aria-controls={collapseId}
             aria-expanded={open}
           >
@@ -122,12 +154,26 @@ export const App = () => {
     );
   };
 
-  //Icon Component
-  const Icon = ({ icon, margin = 'me-1', children }) => {
+  interface IconProps {
+    readonly icon: string;
+    readonly margin?: string;
+    readonly children?: ReactNode;
+  }
+
+  const Icon = ({ icon, margin = 'me-1', children }: IconProps) => {
     return <i className={`icon-${icon} ${margin}`}>{children}</i>;
   };
 
-  const Slider = ({ value, min, max, step, onChange, label }) => {
+  interface SliderProps {
+    readonly value: number;
+    readonly min: number;
+    readonly max: number;
+    readonly step: number;
+    readonly onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+    readonly label: string;
+  }
+
+  const Slider = ({ value, min, max, step, onChange, label }: SliderProps) => {
     return (
       <div>
         <Form.Label
@@ -168,7 +214,19 @@ export const App = () => {
     );
   };
 
-  const ToggleButton = ({ initialState, onState, offState, onToggle }) => {
+  interface ToggleButtonProps {
+    readonly initialState: boolean;
+    readonly onState: ReactNode;
+    readonly offState: ReactNode;
+    readonly onToggle: (isOn: boolean) => void;
+  }
+
+  const ToggleButton = ({
+    initialState,
+    onState,
+    offState,
+    onToggle,
+  }: ToggleButtonProps) => {
     const [isOn, setIsOn] = useState(initialState);
 
     const handleClick = () => {
@@ -186,7 +244,12 @@ export const App = () => {
     );
   };
 
-  const RunButton = ({ state, onClick }) => {
+  interface RunButtonProps {
+    readonly state: number;
+    readonly onClick: () => void;
+  }
+
+  const RunButton = ({ state, onClick }: RunButtonProps) => {
     return (
       <div>
         {state === 0 && (
@@ -225,7 +288,7 @@ export const App = () => {
     );
   };
 
-  const ClusterProperties = ({ handleSaveClusterProperties }) => {
+  const ClusterProperties = () => {
     const [numNodes, setNumNodes] = useState(3);
     const [instanceType, setInstanceType] = useState('t2.micro');
 
@@ -239,7 +302,9 @@ export const App = () => {
               min={1}
               max={10}
               step={1}
-              onChange={(e) => setNumNodes(Number(e.target.value))}
+              onChange={(e) => {
+                setNumNodes(Number(e.target.value));
+              }}
               label="Number of Nodes"
             />
 
@@ -254,7 +319,9 @@ export const App = () => {
               <div>
                 <Form.Select
                   value={instanceType}
-                  onChange={(e) => setInstanceType(e.target.value)}
+                  onChange={(e) => {
+                    setInstanceType(e.target.value);
+                  }}
                 >
                   <option value="t2.micro">t2.micro</option>
                   <option value="t2.small">t2.small</option>
@@ -269,7 +336,9 @@ export const App = () => {
             <div className="hstack gap-3">
               <Button
                 variant="primary"
-                onClick={() => emitEvent('sample_data')}
+                onClick={() => {
+                  emitEvent('sample_data');
+                }}
               >
                 Save
               </Button>
@@ -294,7 +363,7 @@ export const App = () => {
     );
   };
 
-  const LoaderProperties = ({ handleSaveLoaderProperties }) => {
+  const LoaderProperties = () => {
     const [readOps, setReadOps] = useState(1000);
     const [writeOps, setWriteOps] = useState(500);
     const [numLoaders, setNumLoaders] = useState(2);
@@ -309,7 +378,9 @@ export const App = () => {
               min={500}
               max={5000}
               step={100}
-              onChange={(e) => setReadOps(Number(e.target.value))}
+              onChange={(e) => {
+                setReadOps(Number(e.target.value));
+              }}
               label="Read Ops/sec"
             />
             <Slider
@@ -317,7 +388,9 @@ export const App = () => {
               min={100}
               max={5000}
               step={100}
-              onChange={(e) => setWriteOps(Number(e.target.value))}
+              onChange={(e) => {
+                setWriteOps(Number(e.target.value));
+              }}
               label="Write Ops/sec"
             />
             <Slider
@@ -325,15 +398,19 @@ export const App = () => {
               min={1}
               max={20}
               step={1}
-              onChange={(e) => setNumLoaders(Number(e.target.value))}
+              onChange={(e) => {
+                setNumLoaders(Number(e.target.value));
+              }}
               label="Number of Loader Instances"
             />
             <div className="hstack gap-3">
               <Button
                 variant="primary"
-                onClick={() =>
-                  handleSaveLoaderProperties(readOps, writeOps, numLoaders)
-                }
+                onClick={() => {
+                  // handleSaveLoaderProperties(readOps, writeOps, numLoaders)
+                  // TODO: What's supposed to happen here?
+                  // In ClusterProperties, we just emit sample data.
+                }}
               >
                 Save
               </Button>
@@ -405,7 +482,9 @@ export const App = () => {
                   title="Set up 3-node cluster"
                   description="Initialize a resilient ScyllaDB cluster with three interconnected nodes, ready for high-performance data operations."
                   collapseId="stepOneCollapse"
-                  onClick={() => emitEvent('original_cluster')}
+                  onClick={() => {
+                    emitEvent('original_cluster');
+                  }}
                 />
               </li>
               <li>
@@ -414,7 +493,9 @@ export const App = () => {
                   title="Load sample data"
                   description="Populate the database with predefined sample data, showcasing key-value pairs, relational mappings, or time-series metrics."
                   collapseId="stepTwoCollapse"
-                  onClick={() => emitEvent('sample_data')}
+                  onClick={() => {
+                    emitEvent('sample_data');
+                  }}
                 />
               </li>
               <li>
@@ -423,7 +504,9 @@ export const App = () => {
                   title="Start loader"
                   description="Simulate real-world traffic by generating a continuous workload on the database to evaluate its performance."
                   collapseId="stepThreeCollapse"
-                  onClick={() => emitEvent('start_stress')}
+                  onClick={() => {
+                    emitEvent('start_stress');
+                  }}
                 />
               </li>
               <li>
@@ -432,7 +515,9 @@ export const App = () => {
                   title="Scale out (add 3 nodes)"
                   description="Seamlessly add three additional nodes to the cluster, enabling automatic data redistribution and increased capacity using ScyllaDB's tablet architecture."
                   collapseId="stepFourCollapse"
-                  onClick={() => emitEvent('scale_out')}
+                  onClick={() => {
+                    emitEvent('scale_out');
+                  }}
                 />
               </li>
               <li>
@@ -441,7 +526,9 @@ export const App = () => {
                   title="Scale in (remove 3 nodes)"
                   description="Simulate real-world traffic by generating a continuous workload on the database to evaluate its performance."
                   collapseId="stepFiveCollapse"
-                  onClick={() => emitEvent('scale_in')}
+                  onClick={() => {
+                    emitEvent('scale_in');
+                  }}
                 />
               </li>
               <li>
@@ -450,7 +537,9 @@ export const App = () => {
                   title="Stop loader"
                   description="Simulate real-world traffic by generating a continuous workload on the database to evaluate its performance."
                   collapseId="stepSixCollapse"
-                  onClick={() => emitEvent('stop_stress')}
+                  onClick={() => {
+                    emitEvent('stop_stress');
+                  }}
                 />
               </li>
             </ol>
@@ -519,7 +608,7 @@ export const App = () => {
                   href="https://www.linkedin.com/company/scylladb"
                   target="_blank"
                 >
-                  <Icon className="linkedin" />
+                  <Icon icon="linkedin" />
                   LinkedIn
                 </Button>
               </div>
@@ -535,7 +624,9 @@ export const App = () => {
 
   // GrafanaContainer Component
   const GrafanaContainer = () => {
-    const [grafanaUrls, setGrafanaUrls] = useState({
+    const [grafanaUrls, setGrafanaUrls] = useState<
+      Readonly<Record<string, string>>
+    >({
       'Loading Grafana...': '',
     });
 
@@ -549,11 +640,20 @@ export const App = () => {
           }
           return response.json();
         })
-        .then((data) => {
-          console.log('Fetched grafanaUrls');
-          setGrafanaUrls(data);
+        .then((data: unknown) => {
+          if (isObject(data) && allRecordValuesAreStrings(data)) {
+            const urls: Record<string, string> = data;
+
+            console.log('Fetched grafanaUrls');
+            setGrafanaUrls(urls);
+          } else {
+            throw new Error(
+              'Invalid Grafana URLs data received. Expected Record<string, string> but got' +
+                String(data)
+            );
+          }
         })
-        .catch((error) => {
+        .catch((error: unknown) => {
           console.error('Error fetching grafanaUrls:', error);
         });
     }, []);
