@@ -20,6 +20,7 @@ import {
   Spinner,
 } from 'react-bootstrap';
 import { io, type Socket } from 'socket.io-client';
+import { Icon } from '@/components/Icon';
 import logo from '@/assets/images/scylla-logo.svg';
 import mascot from '@/assets/images/scylladb-mascot-cloud.svg';
 import {
@@ -167,16 +168,6 @@ const ScenarioCard = ({
       </div>
     </Card>
   );
-};
-
-interface IconProps {
-  readonly icon: string;
-  readonly margin?: string;
-  readonly children?: ReactNode;
-}
-
-const Icon = ({ icon, margin = 'me-1', children }: IconProps) => {
-  return <i className={`icon-${icon} ${margin}`}>{children}</i>;
 };
 
 interface SliderProps {
@@ -566,6 +557,7 @@ const MainContainer = (): ReactElement => {
             </ol>
           </div>
         </Tab>
+
         <Tab
           eventKey="about"
           title={
