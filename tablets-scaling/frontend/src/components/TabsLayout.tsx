@@ -15,7 +15,7 @@ export const TabsLayout = (): ReactElement => (
       eventKey="home"
       title={
         <>
-          <Icon icon="dashboard" /> Dashboard
+          <Icon variant="dashboard" /> Dashboard
         </>
       }
     >
@@ -26,7 +26,7 @@ export const TabsLayout = (): ReactElement => (
       eventKey="settings"
       title={
         <>
-          <Icon icon="rocket" /> Scenarios
+          <Icon variant="rocket" /> Scenarios
         </>
       }
     >
@@ -37,7 +37,7 @@ export const TabsLayout = (): ReactElement => (
       eventKey="about"
       title={
         <>
-          <Icon icon="info" /> About
+          <Icon variant="info" /> About
         </>
       }
     >

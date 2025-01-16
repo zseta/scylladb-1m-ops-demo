@@ -1,11 +1,7 @@
-import type { ReactNode } from 'react';
-
 interface IconProps {
-  readonly icon: string;
-  readonly margin?: string;
-  readonly children?: ReactNode;
+  readonly variant: string;
 }
 
-export const Icon = ({ icon, margin = 'me-1', children }: IconProps) => {
-  return <i className={`icon-${icon} ${margin}`}>{children}</i>;
-};
+export const Icon = ({ variant }: IconProps) => (
+  <i className={`icon-${variant} me-1`} />
+);

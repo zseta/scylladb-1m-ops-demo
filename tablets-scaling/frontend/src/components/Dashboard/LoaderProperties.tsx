@@ -60,12 +60,12 @@ export const LoaderProperties = (): ReactElement => {
             <ToggleButton
               onState={
                 <>
-                  <Icon icon="play" /> Start Loader
+                  <Icon variant="play" /> Start Loader
                 </>
               }
               offState={
                 <>
-                  <Icon icon="stop" /> Stop Loader
+                  <Icon variant="stop" /> Stop Loader
                 </>
               }
               isRunning={isRunning}

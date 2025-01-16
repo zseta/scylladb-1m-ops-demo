@@ -65,12 +65,12 @@ export const ClusterProperties = (): ReactElement => {
             <ToggleButton
               onState={
                 <>
-                  <Icon icon="play" /> Run Cluster
+                  <Icon variant="play" /> Run Cluster
                 </>
               }
               offState={
                 <>
-                  <Icon icon="stop" /> Stop Cluster
+                  <Icon variant="stop" /> Stop Cluster
                 </>
               }
               isRunning={isRunning}

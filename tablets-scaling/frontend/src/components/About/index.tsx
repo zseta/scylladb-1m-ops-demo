@@ -36,7 +36,7 @@ export const About = (): ReactElement => (
           href="https://docs.scylladb.com"
           target="_blank"
         >
-          <Icon icon="docs" />
+          <Icon variant="docs" />
           Documentation
         </Button>
         <Button
@@ -44,7 +44,7 @@ export const About = (): ReactElement => (
           href="https://github.com/scylladb"
           target="_blank"
         >
-          <Icon icon="github" />
+          <Icon variant="github" />
           GitHub
         </Button>
         <Button
@@ -52,14 +52,14 @@ export const About = (): ReactElement => (
           href="https://twitter.com/scylladb"
           target="_blank"
         >
-          <Icon icon="x" />X
+          <Icon variant="x" />X
         </Button>
         <Button
           variant="light"
           href="https://www.linkedin.com/company/scylladb"
           target="_blank"
         >
-          <Icon icon="linkedin" />
+          <Icon variant="linkedin" />
           LinkedIn
         </Button>
       </div>
