@@ -9,27 +9,27 @@ import {
   objectHasProperty,
 } from '@/util/guard';
 
+type GrafanaURLs = Readonly<Record<string, string>>;
+
 export const GrafanaContainer = (): ReactElement => {
-  const [grafanaUrls, setGrafanaUrls] = useState<
-    Readonly<Record<string, string>>
-  >({
+  const [grafanaUrls, setGrafanaUrls] = useState<GrafanaURLs>({
     'Loading Grafana...': '',
   });
 
   useEffect(() => {
+    // TODO: Define this resource and document its use
     fetch('../data/grafana_urls.json') // Adjust the path based on where the file is hosted
       .then((response) => {
         if (!response.ok) {
           throw new Error('Network response was not ok ' + response.statusText);
         }
+
         return response.json();
       })
       .then((data: unknown) => {
-        if (isObject(data) && allRecordValuesAreStrings(data)) {
-          const urls: Record<string, string> = data;
-
+        if (isGrafanaUrls(data)) {
           console.log('Fetched grafanaUrls');
-          setGrafanaUrls(urls);
+          setGrafanaUrls(data);
         } else {
           throw new Error(
             'Invalid Grafana URLs data received. Expected Record<string, string> but got' +
@@ -60,7 +60,7 @@ export const GrafanaContainer = (): ReactElement => {
         >
           <ConsoleOutput />
         </Tab>
-        {/* Dynamically Rendered Tabs */}
+
         {Object.entries(grafanaUrls).map(([key, url]) => (
           <Tab
             eventKey={key.toLowerCase()}
@@ -78,39 +78,35 @@ export const GrafanaContainer = (): ReactElement => {
   );
 };
 
-const ConsoleOutput = () => {
+const isGrafanaUrls = (data: unknown): data is GrafanaURLs =>
+  isObject(data) && allRecordValuesAreStrings(data);
+
+const ConsoleOutput = (): ReactElement => {
   const { socketRef } = useSocketContext();
   const [output, setOutput] = useState('[Welcome to ScyllaDB Tech Demo]');
   const outputRef = useRef<HTMLPreElement | null>(null);
 
+  // Set up socket connection and listen for playbook output
   useEffect(() => {
-    // Initialize the socket connection
     socketRef.current = io();
 
-    // Set up event listeners
     socketRef.current.on('playbook_output', (data: unknown) => {
-      if (
-        isObject(data) &&
-        objectHasProperty(data, 'output') &&
-        typeof data['output'] === 'string'
-      ) {
-        const output = data['output'];
+      if (isPlaybookOutput(data)) {
+        setOutput((prevOutput) => prevOutput + data['output']);
 
-        setOutput((prevOutput) => prevOutput + output);
         console.log(output);
       } else {
         console.error('Invalid data received:', data);
       }
     });
 
-    // Cleanup socket connection on component unmount
     return () => {
       socketRef.current?.disconnect();
     };
-  }, [socketRef]);
+  }, [socketRef, output]);
 
+  // Scroll the pre element to the bottom on output change
   useEffect(() => {
-    // Scroll the pre element to the bottom
     if (outputRef.current) {
       outputRef.current.scrollTop = outputRef.current.scrollHeight;
     }
@@ -126,3 +122,12 @@ const ConsoleOutput = () => {
     </pre>
   );
 };
+
+interface PlaybookOutputData {
+  readonly output: string;
+}
+
+const isPlaybookOutput = (data: unknown): data is PlaybookOutputData =>
+  isObject(data) &&
+  objectHasProperty(data, 'output') &&
+  typeof data['output'] === 'string';
