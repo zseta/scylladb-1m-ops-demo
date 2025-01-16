@@ -17,13 +17,13 @@ import {
   Spinner,
 } from 'react-bootstrap';
 import { io, type Socket } from 'socket.io-client';
-import logo from './assets/images/scylla-logo.svg';
-import mascot from './assets/images/scylladb-mascot-cloud.svg';
+import logo from '@/assets/images/scylla-logo.svg';
+import mascot from '@/assets/images/scylladb-mascot-cloud.svg';
 import {
   allRecordValuesAreStrings,
   isObject,
   objectHasProperty,
-} from './util/guard';
+} from '@/util/guard';
 
 export const App = () => {
   const socketRef = useRef<Socket | null>();
