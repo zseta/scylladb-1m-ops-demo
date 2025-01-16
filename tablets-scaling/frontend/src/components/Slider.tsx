@@ -17,43 +17,43 @@ export const Slider = ({
   step,
   onChange,
   label,
-}: SliderProps) => {
-  return (
-    <div>
-      <Form.Label
-        column
-        sm="4"
-        className="small-label"
-      >
-        {label}
-      </Form.Label>
-      <Row>
-        <Col>
-          <Form.Range
-            value={value}
-            min={min}
-            max={max}
-            step={step}
-            onChange={onChange}
-          />
-          <div className="d-flex justify-content-between">
-            <div className="small-label">{min}</div>
-            <div className="small-label">{max}</div>
-          </div>
-        </Col>
+}: SliderProps) => (
+  <>
+    <Form.Label
+      column
+      sm="4"
+      className="small-label"
+    >
+      {label}
+    </Form.Label>
 
-        <div style={{ width: '90px' }}>
-          <Form.Control
-            type="number"
-            value={value}
-            min={min}
-            max={max}
-            step={step}
-            onChange={onChange}
-            className="blend-input"
-          />
+    <Row>
+      <Col>
+        <Form.Range
+          value={value}
+          min={min}
+          max={max}
+          step={step}
+          onChange={onChange}
+        />
+
+        <div className="d-flex justify-content-between">
+          <div className="small-label">{min}</div>
+          <div className="small-label">{max}</div>
         </div>
-      </Row>
-    </div>
-  );
-};
+      </Col>
+
+      <div style={{ width: '90px' }}>
+        <Form.Control
+          type="number"
+          value={value}
+          min={min}
+          max={max}
+          step={step}
+          onChange={onChange}
+          className="blend-input"
+        />
+      </div>
+    </Row>
+  </>
+);
