@@ -1,9 +1,12 @@
 import {
   type ChangeEvent,
+  type ReactElement,
   type ReactNode,
   useEffect,
   useState,
   useRef,
+  createContext,
+  useContext,
 } from 'react';
 import {
   Tabs,
@@ -25,8 +28,15 @@ import {
   objectHasProperty,
 } from '@/util/guard';
 
+interface SocketContext {
+  readonly socketRef: React.MutableRefObject<Socket | null>;
+  readonly emitEvent: (eventName: string) => void;
+}
+
+const socketContext = createContext<SocketContext | null>(null);
+
 export const App = () => {
-  const socketRef = useRef<Socket | null>();
+  const socketRef = useRef<Socket | null>(null);
 
   const emitEvent = (eventName: string) => {
     console.log(`Emitting event: ${eventName}`);
@@ -36,407 +46,418 @@ export const App = () => {
     }
   };
 
-  const handleClusterToggle = (isRunning: boolean) => {
-    if (isRunning) {
-      console.log('Loader Started');
-    } else {
-      console.log('Loader Stopped');
-    }
-  };
+  return (
+    <socketContext.Provider value={{ socketRef: socketRef, emitEvent }}>
+      <MainContainer />
+      <GrafanaContainer />
+    </socketContext.Provider>
+  );
+};
 
-  const handleLoaderToggle = (isRunning: boolean) => {
-    if (isRunning) {
-      console.log('Loader Started');
-    } else {
-      console.log('Loader Stopped');
-    }
-  };
+const useSocketContext = (): SocketContext => {
+  const context = useContext(socketContext);
 
-  const ConsoleOutput = () => {
-    const [output, setOutput] = useState('[Welcome to ScyllaDB Tech Demo]');
-    const outputRef = useRef<HTMLPreElement | null>(null);
-
-    useEffect(() => {
-      // Initialize the socket connection
-      socketRef.current = io();
-
-      // Set up event listeners
-      socketRef.current.on('playbook_output', (data: unknown) => {
-        if (
-          isObject(data) &&
-          objectHasProperty(data, 'output') &&
-          typeof data['output'] === 'string'
-        ) {
-          const output = data['output'];
-
-          setOutput((prevOutput) => prevOutput + output);
-          console.log(output);
-        } else {
-          console.error('Invalid data received:', data);
-        }
-      });
-
-      // Cleanup socket connection on component unmount
-      return () => {
-        socketRef.current?.disconnect();
-      };
-    }, []);
-
-    useEffect(() => {
-      // Scroll the pre element to the bottom
-      if (outputRef.current) {
-        outputRef.current.scrollTop = outputRef.current.scrollHeight;
-      }
-    }, [output]);
-
-    return (
-      <pre
-        id="output"
-        className="pre flex-grow-1"
-        ref={outputRef}
-      >
-        {output}
-      </pre>
+  if (context === null) {
+    throw new Error(
+      'useSocketRefContext must be used within socketRefContext.Provider'
     );
+  } else {
+    return context;
+  }
+};
+
+const ConsoleOutput = () => {
+  const { socketRef } = useSocketContext();
+  const [output, setOutput] = useState('[Welcome to ScyllaDB Tech Demo]');
+  const outputRef = useRef<HTMLPreElement | null>(null);
+
+  useEffect(() => {
+    // Initialize the socket connection
+    socketRef.current = io();
+
+    // Set up event listeners
+    socketRef.current.on('playbook_output', (data: unknown) => {
+      if (
+        isObject(data) &&
+        objectHasProperty(data, 'output') &&
+        typeof data['output'] === 'string'
+      ) {
+        const output = data['output'];
+
+        setOutput((prevOutput) => prevOutput + output);
+        console.log(output);
+      } else {
+        console.error('Invalid data received:', data);
+      }
+    });
+
+    // Cleanup socket connection on component unmount
+    return () => {
+      socketRef.current?.disconnect();
+    };
+  }, [socketRef]);
+
+  useEffect(() => {
+    // Scroll the pre element to the bottom
+    if (outputRef.current) {
+      outputRef.current.scrollTop = outputRef.current.scrollHeight;
+    }
+  }, [output]);
+
+  return (
+    <pre
+      id="output"
+      className="pre flex-grow-1"
+      ref={outputRef}
+    >
+      {output}
+    </pre>
+  );
+};
+
+interface ScenarioCardProps {
+  readonly icon: string;
+  readonly title: string;
+  readonly description: string;
+  readonly collapseId: string;
+  readonly onClick: () => void;
+}
+
+const ScenarioCard = ({
+  icon,
+  title,
+  description,
+  collapseId,
+  onClick,
+}: ScenarioCardProps) => {
+  const [open, setOpen] = useState(true);
+  const [runState, setRunState] = useState(0);
+
+  const handleButtonClick = () => {
+    setRunState(2);
+    onClick();
   };
 
-  interface ScenarioCardProps {
-    readonly icon: string;
-    readonly title: string;
-    readonly description: string;
-    readonly collapseId: string;
-    readonly onClick: () => void;
-  }
+  return (
+    <Card className="p-2">
+      <div className="desc">
+        <a
+          className="d-block flex-grow-1"
+          onClick={() => {
+            setOpen(!open);
+          }}
+          aria-controls={collapseId}
+          aria-expanded={open}
+        >
+          <h4>
+            <i className={icon}></i> {title}
+          </h4>
+        </a>
+        <Collapse in={open}>
+          <div id={collapseId}>
+            <div className="collapse-content">{description}</div>
+          </div>
+        </Collapse>
+      </div>
+      <div className="actions">
+        <RunButton
+          state={runState}
+          onClick={handleButtonClick}
+        />
+      </div>
+    </Card>
+  );
+};
 
-  const ScenarioCard = ({
-    icon,
-    title,
-    description,
-    collapseId,
-    onClick,
-  }: ScenarioCardProps) => {
-    const [open, setOpen] = useState(true);
-    const [runState, setRunState] = useState(0);
+interface IconProps {
+  readonly icon: string;
+  readonly margin?: string;
+  readonly children?: ReactNode;
+}
 
-    const handleButtonClick = () => {
-      setRunState(2);
-      onClick();
-    };
+const Icon = ({ icon, margin = 'me-1', children }: IconProps) => {
+  return <i className={`icon-${icon} ${margin}`}>{children}</i>;
+};
 
-    return (
-      <Card className="p-2">
-        <div className="desc">
-          <a
-            className="d-block flex-grow-1"
-            onClick={() => {
-              setOpen(!open);
-            }}
-            aria-controls={collapseId}
-            aria-expanded={open}
-          >
-            <h4>
-              <i className={icon}></i> {title}
-            </h4>
-          </a>
-          <Collapse in={open}>
-            <div id={collapseId}>
-              <div className="collapse-content">{description}</div>
-            </div>
-          </Collapse>
-        </div>
-        <div className="actions">
-          <RunButton
-            state={runState}
-            onClick={handleButtonClick}
+interface SliderProps {
+  readonly value: number;
+  readonly min: number;
+  readonly max: number;
+  readonly step: number;
+  readonly onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  readonly label: string;
+}
+
+const Slider = ({ value, min, max, step, onChange, label }: SliderProps) => {
+  return (
+    <div>
+      <Form.Label
+        column
+        sm="4"
+        className="small-label"
+      >
+        {label}
+      </Form.Label>
+      <Row>
+        <Col>
+          <Form.Range
+            value={value}
+            min={min}
+            max={max}
+            step={step}
+            onChange={onChange}
+          />
+          <div className="d-flex justify-content-between">
+            <div className="small-label">{min}</div>
+            <div className="small-label">{max}</div>
+          </div>
+        </Col>
+
+        <div style={{ width: '90px' }}>
+          <Form.Control
+            type="number"
+            value={value}
+            min={min}
+            max={max}
+            step={step}
+            onChange={onChange}
+            className="blend-input"
           />
         </div>
-      </Card>
-    );
-  };
+      </Row>
+    </div>
+  );
+};
 
-  interface IconProps {
-    readonly icon: string;
-    readonly margin?: string;
-    readonly children?: ReactNode;
-  }
+interface ToggleButtonProps {
+  readonly onState: ReactNode;
+  readonly offState: ReactNode;
+  readonly isRunning: boolean;
+  readonly onClick: () => void;
+}
 
-  const Icon = ({ icon, margin = 'me-1', children }: IconProps) => {
-    return <i className={`icon-${icon} ${margin}`}>{children}</i>;
-  };
+const ToggleButton = ({
+  onState,
+  offState,
+  isRunning,
+  onClick,
+}: ToggleButtonProps) => {
+  return (
+    <Button
+      variant={isRunning ? 'warning' : 'success'}
+      onClick={onClick}
+    >
+      {isRunning ? offState : onState}
+    </Button>
+  );
+};
 
-  interface SliderProps {
-    readonly value: number;
-    readonly min: number;
-    readonly max: number;
-    readonly step: number;
-    readonly onChange: (event: ChangeEvent<HTMLInputElement>) => void;
-    readonly label: string;
-  }
+interface RunButtonProps {
+  readonly state: number;
+  readonly onClick: () => void;
+}
 
-  const Slider = ({ value, min, max, step, onChange, label }: SliderProps) => {
-    return (
-      <div>
-        <Form.Label
-          column
-          sm="4"
-          className="small-label"
+const RunButton = ({ state, onClick }: RunButtonProps) => {
+  return (
+    <div>
+      {state === 0 && (
+        <Button
+          variant="light"
+          onClick={onClick}
         >
-          {label}
-        </Form.Label>
-        <Row>
-          <Col>
-            <Form.Range
-              value={value}
-              min={min}
-              max={max}
-              step={step}
-              onChange={onChange}
-            />
-            <div className="d-flex justify-content-between">
-              <div className="small-label">{min}</div>
-              <div className="small-label">{max}</div>
-            </div>
-          </Col>
+          <i className="icon-play me-2"></i> Run
+        </Button>
+      )}
+      {state === 1 && (
+        <Button
+          variant="light"
+          disabled
+        >
+          <Spinner
+            as="span"
+            animation="border"
+            size="sm"
+            role="status"
+            aria-hidden="true"
+            className="me-2"
+          />
+          Running
+        </Button>
+      )}
+      {state === 2 && (
+        <Button
+          variant="success"
+          disabled
+        >
+          <i className="icon-check"></i>
+        </Button>
+      )}
+    </div>
+  );
+};
 
-          <div style={{ width: '90px' }}>
-            <Form.Control
-              type="number"
-              value={value}
-              min={min}
-              max={max}
-              step={step}
-              onChange={onChange}
-              className="blend-input"
+const ClusterProperties = (): ReactElement => {
+  const [isRunning, setIsRunning] = useState(false);
+  const [numNodes, setNumNodes] = useState(3);
+  const [instanceType, setInstanceType] = useState('t2.micro');
+  const { emitEvent } = useSocketContext();
+
+  return (
+    <Card>
+      <Card.Body>
+        <h3 className="mb-3">Cluster Properties</h3>
+        <Form className="vstack gap-3 mb-3">
+          <Slider
+            value={numNodes}
+            min={1}
+            max={10}
+            step={1}
+            onChange={(e) => {
+              setNumNodes(Number(e.target.value));
+            }}
+            label="Number of Nodes"
+          />
+
+          <Form.Group>
+            <Form.Label
+              column
+              sm="4"
+              className="small-label"
+            >
+              Instance Type
+            </Form.Label>
+            <div>
+              <Form.Select
+                value={instanceType}
+                onChange={(e) => {
+                  setInstanceType(e.target.value);
+                }}
+              >
+                <option value="t2.micro">t2.micro</option>
+                <option value="t2.small">t2.small</option>
+                <option value="t2.medium">t2.medium</option>
+                <option value="t3.micro">t3.micro</option>
+                <option value="t3.small">t3.small</option>
+                <option value="t3.medium">t3.medium</option>
+              </Form.Select>
+            </div>
+          </Form.Group>
+
+          <div className="hstack gap-3">
+            <Button
+              variant="primary"
+              onClick={() => {
+                emitEvent('sample_data');
+              }}
+            >
+              Save
+            </Button>
+
+            <ToggleButton
+              onState={
+                <>
+                  <Icon icon="play" /> Run Cluster
+                </>
+              }
+              offState={
+                <>
+                  <Icon icon="stop" /> Stop Cluster
+                </>
+              }
+              isRunning={isRunning}
+              onClick={() => {
+                setIsRunning((prevIsRunning) => !prevIsRunning);
+                console.log('Cluster stopped.');
+              }}
             />
           </div>
-        </Row>
-      </div>
-    );
-  };
+        </Form>
+      </Card.Body>
+    </Card>
+  );
+};
 
-  interface ToggleButtonProps {
-    readonly initialState: boolean;
-    readonly onState: ReactNode;
-    readonly offState: ReactNode;
-    readonly onToggle: (isOn: boolean) => void;
-  }
+const LoaderProperties = (): ReactElement => {
+  const [isRunning, setIsRunning] = useState(false);
+  const [readOps, setReadOps] = useState(1000);
+  const [writeOps, setWriteOps] = useState(500);
+  const [numLoaders, setNumLoaders] = useState(2);
 
-  const ToggleButton = ({
-    initialState,
-    onState,
-    offState,
-    onToggle,
-  }: ToggleButtonProps) => {
-    const [isOn, setIsOn] = useState(initialState);
-
-    const handleClick = () => {
-      setIsOn(!isOn);
-      onToggle(!isOn); // Notify parent of state change
-    };
-
-    return (
-      <Button
-        variant={isOn ? 'warning' : 'success'}
-        onClick={handleClick}
-      >
-        {isOn ? offState : onState}
-      </Button>
-    );
-  };
-
-  interface RunButtonProps {
-    readonly state: number;
-    readonly onClick: () => void;
-  }
-
-  const RunButton = ({ state, onClick }: RunButtonProps) => {
-    return (
-      <div>
-        {state === 0 && (
-          <Button
-            variant="light"
-            onClick={onClick}
-          >
-            <i className="icon-play me-2"></i> Run
-          </Button>
-        )}
-        {state === 1 && (
-          <Button
-            variant="light"
-            disabled
-          >
-            <Spinner
-              as="span"
-              animation="border"
-              size="sm"
-              role="status"
-              aria-hidden="true"
-              className="me-2"
-            />
-            Running
-          </Button>
-        )}
-        {state === 2 && (
-          <Button
-            variant="success"
-            disabled
-          >
-            <i className="icon-check"></i>
-          </Button>
-        )}
-      </div>
-    );
-  };
-
-  const ClusterProperties = () => {
-    const [numNodes, setNumNodes] = useState(3);
-    const [instanceType, setInstanceType] = useState('t2.micro');
-
-    return (
-      <Card>
-        <Card.Body>
-          <h3 className="mb-3">Cluster Properties</h3>
-          <Form className="vstack gap-3 mb-3">
-            <Slider
-              value={numNodes}
-              min={1}
-              max={10}
-              step={1}
-              onChange={(e) => {
-                setNumNodes(Number(e.target.value));
+  return (
+    <Card>
+      <Card.Body>
+        <h3 className="mb-3">Loader Properties</h3>
+        <Form className="vstack gap-3">
+          <Slider
+            value={readOps}
+            min={500}
+            max={5000}
+            step={100}
+            onChange={(e) => {
+              setReadOps(Number(e.target.value));
+            }}
+            label="Read Ops/sec"
+          />
+          <Slider
+            value={writeOps}
+            min={100}
+            max={5000}
+            step={100}
+            onChange={(e) => {
+              setWriteOps(Number(e.target.value));
+            }}
+            label="Write Ops/sec"
+          />
+          <Slider
+            value={numLoaders}
+            min={1}
+            max={20}
+            step={1}
+            onChange={(e) => {
+              setNumLoaders(Number(e.target.value));
+            }}
+            label="Number of Loader Instances"
+          />
+          <div className="hstack gap-3">
+            <Button
+              variant="primary"
+              onClick={() => {
+                // handleSaveLoaderProperties(readOps, writeOps, numLoaders)
+                // TODO: What's supposed to happen here?
+                // In ClusterProperties, we just emit sample data.
               }}
-              label="Number of Nodes"
-            />
+            >
+              Save
+            </Button>
 
-            <Form.Group>
-              <Form.Label
-                column
-                sm="4"
-                className="small-label"
-              >
-                Instance Type
-              </Form.Label>
-              <div>
-                <Form.Select
-                  value={instanceType}
-                  onChange={(e) => {
-                    setInstanceType(e.target.value);
-                  }}
-                >
-                  <option value="t2.micro">t2.micro</option>
-                  <option value="t2.small">t2.small</option>
-                  <option value="t2.medium">t2.medium</option>
-                  <option value="t3.micro">t3.micro</option>
-                  <option value="t3.small">t3.small</option>
-                  <option value="t3.medium">t3.medium</option>
-                </Form.Select>
-              </div>
-            </Form.Group>
-
-            <div className="hstack gap-3">
-              <Button
-                variant="primary"
-                onClick={() => {
-                  emitEvent('sample_data');
-                }}
-              >
-                Save
-              </Button>
-              <ToggleButton
-                initialState={false}
-                onState={
-                  <>
-                    <Icon icon="play" /> Run Cluster
-                  </>
-                }
-                offState={
-                  <>
-                    <Icon icon="stop" /> Stop Cluster
-                  </>
-                }
-                onToggle={handleClusterToggle}
-              />
-            </div>
-          </Form>
-        </Card.Body>
-      </Card>
-    );
-  };
-
-  const LoaderProperties = () => {
-    const [readOps, setReadOps] = useState(1000);
-    const [writeOps, setWriteOps] = useState(500);
-    const [numLoaders, setNumLoaders] = useState(2);
-
-    return (
-      <Card>
-        <Card.Body>
-          <h3 className="mb-3">Loader Properties</h3>
-          <Form className="vstack gap-3">
-            <Slider
-              value={readOps}
-              min={500}
-              max={5000}
-              step={100}
-              onChange={(e) => {
-                setReadOps(Number(e.target.value));
+            <ToggleButton
+              onState={
+                <>
+                  <Icon icon="play" /> Start Loader
+                </>
+              }
+              offState={
+                <>
+                  <Icon icon="stop" /> Stop Loader
+                </>
+              }
+              isRunning={isRunning}
+              onClick={() => {
+                setIsRunning((prevIsRunning) => !prevIsRunning);
+                console.log('Loader stopped.');
               }}
-              label="Read Ops/sec"
             />
-            <Slider
-              value={writeOps}
-              min={100}
-              max={5000}
-              step={100}
-              onChange={(e) => {
-                setWriteOps(Number(e.target.value));
-              }}
-              label="Write Ops/sec"
-            />
-            <Slider
-              value={numLoaders}
-              min={1}
-              max={20}
-              step={1}
-              onChange={(e) => {
-                setNumLoaders(Number(e.target.value));
-              }}
-              label="Number of Loader Instances"
-            />
-            <div className="hstack gap-3">
-              <Button
-                variant="primary"
-                onClick={() => {
-                  // handleSaveLoaderProperties(readOps, writeOps, numLoaders)
-                  // TODO: What's supposed to happen here?
-                  // In ClusterProperties, we just emit sample data.
-                }}
-              >
-                Save
-              </Button>
-              <ToggleButton
-                initialState={false}
-                onState={
-                  <>
-                    <Icon icon="play" /> Start Loader
-                  </>
-                }
-                offState={
-                  <>
-                    <Icon icon="stop" /> Stop Loader
-                  </>
-                }
-                onToggle={handleLoaderToggle}
-              />
-            </div>
-          </Form>
-        </Card.Body>
-      </Card>
-    );
-  };
+          </div>
+        </Form>
+      </Card.Body>
+    </Card>
+  );
+};
 
-  // MainContainer Component
-  const MainContainer = () => (
+const MainContainer = (): ReactElement => {
+  const { emitEvent } = useSocketContext();
+
+  return (
     <div className="controls gap-4">
       <div className="top-nav d-flex align-items-center">
         <img
@@ -621,83 +642,73 @@ export const App = () => {
       </Tabs>
     </div>
   );
+};
 
-  // GrafanaContainer Component
-  const GrafanaContainer = () => {
-    const [grafanaUrls, setGrafanaUrls] = useState<
-      Readonly<Record<string, string>>
-    >({
-      'Loading Grafana...': '',
-    });
+const GrafanaContainer = (): ReactElement => {
+  const [grafanaUrls, setGrafanaUrls] = useState<
+    Readonly<Record<string, string>>
+  >({
+    'Loading Grafana...': '',
+  });
 
-    useEffect(() => {
-      fetch('../data/grafana_urls.json') // Adjust the path based on where the file is hosted
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error(
-              'Network response was not ok ' + response.statusText
-            );
-          }
-          return response.json();
-        })
-        .then((data: unknown) => {
-          if (isObject(data) && allRecordValuesAreStrings(data)) {
-            const urls: Record<string, string> = data;
+  useEffect(() => {
+    fetch('../data/grafana_urls.json') // Adjust the path based on where the file is hosted
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok ' + response.statusText);
+        }
+        return response.json();
+      })
+      .then((data: unknown) => {
+        if (isObject(data) && allRecordValuesAreStrings(data)) {
+          const urls: Record<string, string> = data;
 
-            console.log('Fetched grafanaUrls');
-            setGrafanaUrls(urls);
-          } else {
-            throw new Error(
-              'Invalid Grafana URLs data received. Expected Record<string, string> but got' +
-                String(data)
-            );
-          }
-        })
-        .catch((error: unknown) => {
-          console.error('Error fetching grafanaUrls:', error);
-        });
-    }, []);
-
-    return (
-      <div className="grafana">
-        <Tabs
-          defaultActiveKey="console"
-          id="tabMenu"
-          className="nav-tabs"
-          transition={false}
-        >
-          <Tab
-            eventKey="console"
-            title={
-              <>
-                <Icon icon="terminal" /> Console
-              </>
-            }
-          >
-            <ConsoleOutput />
-          </Tab>
-          {/* Dynamically Rendered Tabs */}
-          {Object.entries(grafanaUrls).map(([key, url]) => (
-            <Tab
-              eventKey={key.toLowerCase()}
-              title={key}
-              key={key}
-            >
-              <iframe
-                src={url}
-                title={key}
-              ></iframe>
-            </Tab>
-          ))}
-        </Tabs>
-      </div>
-    );
-  };
+          console.log('Fetched grafanaUrls');
+          setGrafanaUrls(urls);
+        } else {
+          throw new Error(
+            'Invalid Grafana URLs data received. Expected Record<string, string> but got' +
+              String(data)
+          );
+        }
+      })
+      .catch((error: unknown) => {
+        console.error('Error fetching grafanaUrls:', error);
+      });
+  }, []);
 
   return (
-    <>
-      <MainContainer />
-      <GrafanaContainer />
-    </>
+    <div className="grafana">
+      <Tabs
+        defaultActiveKey="console"
+        id="tabMenu"
+        className="nav-tabs"
+        transition={false}
+      >
+        <Tab
+          eventKey="console"
+          title={
+            <>
+              <Icon icon="terminal" /> Console
+            </>
+          }
+        >
+          <ConsoleOutput />
+        </Tab>
+        {/* Dynamically Rendered Tabs */}
+        {Object.entries(grafanaUrls).map(([key, url]) => (
+          <Tab
+            eventKey={key.toLowerCase()}
+            title={key}
+            key={key}
+          >
+            <iframe
+              src={url}
+              title={key}
+            ></iframe>
+          </Tab>
+        ))}
+      </Tabs>
+    </div>
   );
 };
