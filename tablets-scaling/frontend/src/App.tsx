@@ -1,16 +1,8 @@
-import { type ReactElement, type ReactNode, useState } from 'react';
-import {
-  Tabs,
-  Tab,
-  Button,
-  Collapse,
-  Card,
-  Form,
-  Spinner,
-} from 'react-bootstrap';
+import { type ReactElement, useState } from 'react';
+import { Tabs, Tab, Button, Collapse, Card, Spinner } from 'react-bootstrap';
 import { Icon } from '@/components/Icon';
-import { Slider } from '@/components/Slider';
 import { GrafanaContainer } from '@/components/Grafana';
+import { Dashboard } from '@/components/Dashboard';
 import { useSocketContext } from '@/context/socket';
 import { SocketProvider } from '@/context/SocketProvider';
 import logo from '@/assets/images/scylla-logo.svg';
@@ -77,29 +69,6 @@ const ScenarioCard = ({
   );
 };
 
-interface ToggleButtonProps {
-  readonly onState: ReactNode;
-  readonly offState: ReactNode;
-  readonly isRunning: boolean;
-  readonly onClick: () => void;
-}
-
-const ToggleButton = ({
-  onState,
-  offState,
-  isRunning,
-  onClick,
-}: ToggleButtonProps) => {
-  return (
-    <Button
-      variant={isRunning ? 'warning' : 'success'}
-      onClick={onClick}
-    >
-      {isRunning ? offState : onState}
-    </Button>
-  );
-};
-
 interface RunButtonProps {
   readonly state: number;
   readonly onClick: () => void;
@@ -144,164 +113,6 @@ const RunButton = ({ state, onClick }: RunButtonProps) => {
   );
 };
 
-const ClusterProperties = (): ReactElement => {
-  const [isRunning, setIsRunning] = useState(false);
-  const [numNodes, setNumNodes] = useState(3);
-  const [instanceType, setInstanceType] = useState('t2.micro');
-  const { emitEvent } = useSocketContext();
-
-  return (
-    <Card>
-      <Card.Body>
-        <h3 className="mb-3">Cluster Properties</h3>
-        <Form className="vstack gap-3 mb-3">
-          <Slider
-            value={numNodes}
-            min={1}
-            max={10}
-            step={1}
-            onChange={(e) => {
-              setNumNodes(Number(e.target.value));
-            }}
-            label="Number of Nodes"
-          />
-
-          <Form.Group>
-            <Form.Label
-              column
-              sm="4"
-              className="small-label"
-            >
-              Instance Type
-            </Form.Label>
-            <div>
-              <Form.Select
-                value={instanceType}
-                onChange={(e) => {
-                  setInstanceType(e.target.value);
-                }}
-              >
-                <option value="t2.micro">t2.micro</option>
-                <option value="t2.small">t2.small</option>
-                <option value="t2.medium">t2.medium</option>
-                <option value="t3.micro">t3.micro</option>
-                <option value="t3.small">t3.small</option>
-                <option value="t3.medium">t3.medium</option>
-              </Form.Select>
-            </div>
-          </Form.Group>
-
-          <div className="hstack gap-3">
-            <Button
-              variant="primary"
-              onClick={() => {
-                emitEvent('sample_data');
-              }}
-            >
-              Save
-            </Button>
-
-            <ToggleButton
-              onState={
-                <>
-                  <Icon icon="play" /> Run Cluster
-                </>
-              }
-              offState={
-                <>
-                  <Icon icon="stop" /> Stop Cluster
-                </>
-              }
-              isRunning={isRunning}
-              onClick={() => {
-                setIsRunning((prevIsRunning) => !prevIsRunning);
-                console.log('Cluster stopped.');
-              }}
-            />
-          </div>
-        </Form>
-      </Card.Body>
-    </Card>
-  );
-};
-
-const LoaderProperties = (): ReactElement => {
-  const [isRunning, setIsRunning] = useState(false);
-  const [readOps, setReadOps] = useState(1000);
-  const [writeOps, setWriteOps] = useState(500);
-  const [numLoaders, setNumLoaders] = useState(2);
-
-  return (
-    <Card>
-      <Card.Body>
-        <h3 className="mb-3">Loader Properties</h3>
-        <Form className="vstack gap-3">
-          <Slider
-            value={readOps}
-            min={500}
-            max={5000}
-            step={100}
-            onChange={(e) => {
-              setReadOps(Number(e.target.value));
-            }}
-            label="Read Ops/sec"
-          />
-          <Slider
-            value={writeOps}
-            min={100}
-            max={5000}
-            step={100}
-            onChange={(e) => {
-              setWriteOps(Number(e.target.value));
-            }}
-            label="Write Ops/sec"
-          />
-          <Slider
-            value={numLoaders}
-            min={1}
-            max={20}
-            step={1}
-            onChange={(e) => {
-              setNumLoaders(Number(e.target.value));
-            }}
-            label="Number of Loader Instances"
-          />
-          <div className="hstack gap-3">
-            <Button
-              variant="primary"
-              onClick={() => {
-                // handleSaveLoaderProperties(readOps, writeOps, numLoaders)
-                // TODO: What's supposed to happen here?
-                // In ClusterProperties, we just emit sample data.
-              }}
-            >
-              Save
-            </Button>
-
-            <ToggleButton
-              onState={
-                <>
-                  <Icon icon="play" /> Start Loader
-                </>
-              }
-              offState={
-                <>
-                  <Icon icon="stop" /> Stop Loader
-                </>
-              }
-              isRunning={isRunning}
-              onClick={() => {
-                setIsRunning((prevIsRunning) => !prevIsRunning);
-                console.log('Loader stopped.');
-              }}
-            />
-          </div>
-        </Form>
-      </Card.Body>
-    </Card>
-  );
-};
-
 const MainContainer = (): ReactElement => {
   const { emitEvent } = useSocketContext();
 
@@ -329,11 +140,9 @@ const MainContainer = (): ReactElement => {
             </>
           }
         >
-          <>
-            <ClusterProperties />
-            <LoaderProperties />
-          </>
+          <Dashboard />
         </Tab>
+
         <Tab
           eventKey="settings"
           title={
