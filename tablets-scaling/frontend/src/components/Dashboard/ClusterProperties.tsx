@@ -3,9 +3,9 @@ import { Button, Card, Form } from 'react-bootstrap';
 import { Icon } from '@/components/Icon';
 import { Slider } from '@/components/Slider';
 import { ToggleButton } from '@/components/Dashboard/ToggleButton';
+import { SectionHeader } from '@/components/SectionHeader';
 import {
   ButtonsContainer,
-  CardHeader,
   PropertiesForm,
 } from '@/components/Dashboard/Layout';
 
@@ -31,7 +31,7 @@ export const ClusterProperties = (): ReactElement => {
   return (
     <Card>
       <Card.Body>
-        <CardHeader>Cluster Properties</CardHeader>
+        <SectionHeader>Cluster Properties</SectionHeader>
 
         <PropertiesForm utilClassesString="mb-3">
           <Slider

@@ -4,12 +4,11 @@ import { io } from 'socket.io-client';
 import { Icon } from '@/components/Icon';
 import { useSocketContext } from '@/context/socket';
 import {
-  allRecordValuesAreStrings,
-  isObject,
-  objectHasProperty,
-} from '@/util/guard';
-
-type GrafanaURLs = Readonly<Record<string, string>>;
+  type GrafanaURLs,
+  isGrafanaUrls,
+  isPlaybookOutput,
+  playbookOutputEventKey,
+} from '@/util/api';
 
 export const GrafanaContainer = (): ReactElement => {
   const [grafanaUrls, setGrafanaUrls] = useState<GrafanaURLs>({
@@ -78,9 +77,6 @@ export const GrafanaContainer = (): ReactElement => {
   );
 };
 
-const isGrafanaUrls = (data: unknown): data is GrafanaURLs =>
-  isObject(data) && allRecordValuesAreStrings(data);
-
 const ConsoleOutput = (): ReactElement => {
   const { socketRef } = useSocketContext();
   const [output, setOutput] = useState('[Welcome to ScyllaDB Tech Demo]');
@@ -90,7 +86,7 @@ const ConsoleOutput = (): ReactElement => {
   useEffect(() => {
     socketRef.current = io();
 
-    socketRef.current.on('playbook_output', (data: unknown) => {
+    socketRef.current.on(playbookOutputEventKey, (data: unknown) => {
       if (isPlaybookOutput(data)) {
         setOutput((prevOutput) => prevOutput + data['output']);
 
@@ -122,12 +118,3 @@ const ConsoleOutput = (): ReactElement => {
     </pre>
   );
 };
-
-interface PlaybookOutputData {
-  readonly output: string;
-}
-
-const isPlaybookOutput = (data: unknown): data is PlaybookOutputData =>
-  isObject(data) &&
-  objectHasProperty(data, 'output') &&
-  typeof data['output'] === 'string';

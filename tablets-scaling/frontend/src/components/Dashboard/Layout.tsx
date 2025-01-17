@@ -2,10 +2,6 @@ import type { ReactElement } from 'react';
 import { Form } from 'react-bootstrap';
 import type { ChildrenProps } from '@/util/props';
 
-export const CardHeader = ({ children }: ChildrenProps): ReactElement => (
-  <h3 className="mb-3">{children}</h3>
-);
-
 export const ButtonsContainer = ({ children }: ChildrenProps): ReactElement => (
   <div className="hstack gap-3">{children}</div>
 );

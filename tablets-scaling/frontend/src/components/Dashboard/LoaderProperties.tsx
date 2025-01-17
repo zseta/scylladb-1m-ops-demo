@@ -3,9 +3,9 @@ import { Button, Card } from 'react-bootstrap';
 import { Icon } from '@/components/Icon';
 import { Slider } from '@/components/Slider';
 import { ToggleButton } from '@/components/Dashboard/ToggleButton';
+import { SectionHeader } from '@/components/SectionHeader';
 import {
   ButtonsContainer,
-  CardHeader,
   PropertiesForm,
 } from '@/components/Dashboard/Layout';
 
@@ -18,7 +18,7 @@ export const LoaderProperties = (): ReactElement => {
   return (
     <Card>
       <Card.Body>
-        <CardHeader>Loader Properties</CardHeader>
+        <SectionHeader>Loader Properties</SectionHeader>
 
         <PropertiesForm>
           <Slider
