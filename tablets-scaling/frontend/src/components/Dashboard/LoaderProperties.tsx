@@ -1,57 +1,65 @@
 import { type ReactElement, useState } from 'react';
-import { Button, Card, Form } from 'react-bootstrap';
+import { Button, Card } from 'react-bootstrap';
 import { Icon } from '@/components/Icon';
 import { Slider } from '@/components/Slider';
 import { ToggleButton } from '@/components/Dashboard/ToggleButton';
+import {
+  ButtonsContainer,
+  CardHeader,
+  PropertiesForm,
+} from '@/components/Dashboard/Layout';
 
 export const LoaderProperties = (): ReactElement => {
   const [isRunning, setIsRunning] = useState(false);
-  const [readOps, setReadOps] = useState(1000);
-  const [writeOps, setWriteOps] = useState(500);
-  const [numLoaders, setNumLoaders] = useState(2);
+  const [readOpsPerSec, setReadOpsPerSec] = useState(1000);
+  const [writeOpsPerSec, setWriteOpsPerSec] = useState(500);
+  const [numberOfLoaders, setNumberOfLoaders] = useState(2);
 
   return (
     <Card>
       <Card.Body>
-        <h3 className="mb-3">Loader Properties</h3>
-        <Form className="vstack gap-3">
+        <CardHeader>Loader Properties</CardHeader>
+
+        <PropertiesForm>
           <Slider
-            value={readOps}
+            value={readOpsPerSec}
             min={500}
             max={5000}
             step={100}
-            onChange={(e) => {
-              setReadOps(Number(e.target.value));
+            onChange={(event) => {
+              setReadOpsPerSec(Number(event.target.value));
             }}
             label="Read Ops/sec"
           />
+
           <Slider
-            value={writeOps}
+            value={writeOpsPerSec}
             min={100}
             max={5000}
             step={100}
-            onChange={(e) => {
-              setWriteOps(Number(e.target.value));
+            onChange={(event) => {
+              setWriteOpsPerSec(Number(event.target.value));
             }}
             label="Write Ops/sec"
           />
+
           <Slider
-            value={numLoaders}
+            value={numberOfLoaders}
             min={1}
             max={20}
             step={1}
-            onChange={(e) => {
-              setNumLoaders(Number(e.target.value));
+            onChange={(event) => {
+              setNumberOfLoaders(Number(event.target.value));
             }}
             label="Number of Loader Instances"
           />
-          <div className="hstack gap-3">
+
+          <ButtonsContainer>
             <Button
               variant="primary"
               onClick={() => {
-                // handleSaveLoaderProperties(readOps, writeOps, numLoaders)
-                // TODO: What's supposed to happen here?
-                // In ClusterProperties, we just emit sample data.
+                // TODO: Implement save logic
+                console.log('Saving loader properties...');
               }}
             >
               Save
@@ -71,11 +79,11 @@ export const LoaderProperties = (): ReactElement => {
               isRunning={isRunning}
               onClick={() => {
                 setIsRunning((prevIsRunning) => !prevIsRunning);
-                console.log('Loader stopped.');
+                console.log(`Loader ${isRunning ? 'stopped' : 'started'}.`);
               }}
             />
-          </div>
-        </Form>
+          </ButtonsContainer>
+        </PropertiesForm>
       </Card.Body>
     </Card>
   );
