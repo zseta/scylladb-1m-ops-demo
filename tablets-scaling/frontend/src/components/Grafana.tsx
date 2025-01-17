@@ -11,14 +11,16 @@ import {
 } from '@/util/api';
 import { TabHeader } from '@/components/TabsLayout';
 
+// This resolves to "<root>/public/data/grafana-urls.json"
+const grafanaUrlsPath = '/data/grafana-urls.json';
+
 export const GrafanaContainer = (): ReactElement => {
   const [grafanaUrls, setGrafanaUrls] = useState<GrafanaURLs>({
     'Loading Grafana...': '',
   });
 
   useEffect(() => {
-    // TODO: Define this resource and document its use
-    fetch('../data/grafana_urls.json') // Adjust the path based on where the file is hosted
+    fetch(grafanaUrlsPath)
       .then((response) => {
         if (!response.ok) {
           throw new Error('Network response was not ok ' + response.statusText);
