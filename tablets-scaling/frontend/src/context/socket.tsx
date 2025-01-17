@@ -1,9 +1,10 @@
 import { type MutableRefObject, createContext, useContext } from 'react';
 import type { Socket } from 'socket.io-client';
+import type { ScenarioEventKey } from '@/util/api';
 
 interface SocketContext {
   readonly socketRef: MutableRefObject<Socket | null>;
-  readonly emitEvent: (eventName: string) => void;
+  readonly emitEvent: (eventKey: ScenarioEventKey) => void;
 }
 
 export const socketContext = createContext<SocketContext | null>(null);
