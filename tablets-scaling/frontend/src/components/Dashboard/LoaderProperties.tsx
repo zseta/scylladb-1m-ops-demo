@@ -1,8 +1,7 @@
 import { type ReactElement, useState } from 'react';
-import { Button, Card } from 'react-bootstrap';
-import { Icon } from '@/components/Icon';
+import { Card } from 'react-bootstrap';
+import { Button } from '@/components/Button';
 import { Slider } from '@/components/Slider';
-import { ToggleButton } from '@/components/Dashboard/ToggleButton';
 import { SectionHeader } from '@/components/SectionHeader';
 import {
   ButtonsContainer,
@@ -65,23 +64,17 @@ export const LoaderProperties = (): ReactElement => {
               Save
             </Button>
 
-            <ToggleButton
-              onState={
-                <>
-                  <Icon variant="play" /> Start Loader
-                </>
-              }
-              offState={
-                <>
-                  <Icon variant="stop" /> Stop Loader
-                </>
-              }
-              isRunning={isRunning}
+            <Button
+              variant={isRunning ? 'warning' : 'success'}
+              iconProps={{
+                variant: isRunning ? 'stop' : 'play',
+                utilClassesString: 'me-2',
+              }}
               onClick={() => {
                 setIsRunning((prevIsRunning) => !prevIsRunning);
                 console.log(`Loader ${isRunning ? 'stopped' : 'started'}.`);
               }}
-            />
+            >{`${isRunning ? 'Stop' : 'Start'} Loader`}</Button>
           </ButtonsContainer>
         </PropertiesForm>
       </Card.Body>

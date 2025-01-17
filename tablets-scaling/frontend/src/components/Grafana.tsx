@@ -53,7 +53,11 @@ export const GrafanaContainer = (): ReactElement => {
           eventKey="console"
           title={
             <>
-              <Icon variant="terminal" /> Console
+              <Icon
+                variant="terminal"
+                utilClassesString="me-1"
+              />{' '}
+              Console
             </>
           }
         >

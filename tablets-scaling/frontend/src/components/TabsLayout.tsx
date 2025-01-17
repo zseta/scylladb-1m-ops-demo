@@ -47,7 +47,11 @@ export const TabsLayout = (): ReactElement => (
         eventKey={key}
         title={
           <>
-            <Icon variant={iconVariant} /> {title}
+            <Icon
+              variant={iconVariant}
+              utilClassesString="me-1"
+            />{' '}
+            {title}
           </>
         }
       >

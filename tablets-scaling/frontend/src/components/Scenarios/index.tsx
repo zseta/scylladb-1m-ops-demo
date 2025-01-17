@@ -4,15 +4,17 @@ import {
   type SetStateAction,
   useState,
 } from 'react';
-import { Collapse, Card, Button, Spinner } from 'react-bootstrap';
+import { Collapse, Card, Spinner } from 'react-bootstrap';
+import { Button } from '@/components/Button';
 import { SectionHeader } from '@/components/SectionHeader';
+import { Icon } from '@/components/Icon';
 import { useSocketContext } from '@/context/socket';
 import type { ScenarioEventKey } from '@/util/api';
 
 const scenarioCardsProps: readonly ScenarioCardProps[] = [
   {
     eventKey: 'original_cluster',
-    icon: 'icon-database',
+    iconVariant: 'database',
     title: 'Set up 3-node cluster',
     description:
       'Initialize a resilient ScyllaDB cluster with three interconnected nodes, ready for high-performance data operations.',
@@ -20,7 +22,7 @@ const scenarioCardsProps: readonly ScenarioCardProps[] = [
   },
   {
     eventKey: 'sample_data',
-    icon: 'icon-sample-data',
+    iconVariant: 'sample-data',
     title: 'Load sample data',
     description:
       'Populate the database with predefined sample data, showcasing key-value pairs, relational mappings, or time-series metrics.',
@@ -28,7 +30,7 @@ const scenarioCardsProps: readonly ScenarioCardProps[] = [
   },
   {
     eventKey: 'start_stress',
-    icon: 'icon-rocket',
+    iconVariant: 'rocket',
     title: 'Start loader',
     description:
       'Simulate real-world traffic by generating a continuous workload on the database to evaluate its performance.',
@@ -36,7 +38,7 @@ const scenarioCardsProps: readonly ScenarioCardProps[] = [
   },
   {
     eventKey: 'scale_out',
-    icon: 'icon-scale_out',
+    iconVariant: 'scale_out',
     title: 'Scale out (add 3 nodes)',
     description:
       "Seamlessly add three additional nodes to the cluster, enabling automatic data redistribution and increased capacity using ScyllaDB's tablet architecture.",
@@ -44,7 +46,7 @@ const scenarioCardsProps: readonly ScenarioCardProps[] = [
   },
   {
     eventKey: 'scale_in',
-    icon: 'icon-scale_in',
+    iconVariant: 'scale_in',
     title: 'Scale in (remove 3 nodes)',
     description:
       'Simulate real-world traffic by generating a continuous workload on the database to evaluate its performance.',
@@ -52,7 +54,7 @@ const scenarioCardsProps: readonly ScenarioCardProps[] = [
   },
   {
     eventKey: 'stop_stress',
-    icon: 'icon-stop',
+    iconVariant: 'stop',
     title: 'Stop loader',
     description:
       'Simulate real-world traffic by generating a continuous workload on the database to evaluate its performance.',
@@ -78,14 +80,14 @@ export interface ScenarioCardProps {
   readonly eventKey: ScenarioEventKey;
   readonly title: string;
   readonly description: string;
-  readonly icon: string;
+  readonly iconVariant: string;
   readonly collapseId: string;
 }
 
 type RunState = 'idle' | 'running' | 'success';
 
 export const ScenarioCard = ({
-  icon,
+  iconVariant,
   title,
   description,
   collapseId,
@@ -99,7 +101,7 @@ export const ScenarioCard = ({
     <Card className="p-2">
       <div className="desc">
         <ScenarioCardHeader
-          icon={icon}
+          iconVariant={iconVariant}
           title={title}
           collapseId={collapseId}
           setIsOpen={setIsOpen}
@@ -127,7 +129,7 @@ export const ScenarioCard = ({
 };
 
 interface ScenarioCardHeaderProps {
-  readonly icon: string;
+  readonly iconVariant: string;
   readonly title: string;
   readonly collapseId: string;
   readonly setIsOpen: Dispatch<SetStateAction<boolean>>;
@@ -135,7 +137,7 @@ interface ScenarioCardHeaderProps {
 }
 
 const ScenarioCardHeader = ({
-  icon,
+  iconVariant,
   title,
   collapseId,
   setIsOpen,
@@ -150,7 +152,7 @@ const ScenarioCardHeader = ({
     aria-expanded={isOpen}
   >
     <h4>
-      <i className={icon}></i> {title}
+      <Icon variant={iconVariant} /> {title}
     </h4>
   </a>
 );
@@ -188,8 +190,9 @@ const ActionButton = ({ runState, onClick }: ActionButtonProps) => {
         <Button
           variant="light"
           onClick={onClick}
+          iconProps={{ variant: 'play', utilClassesString: 'me-2' }}
         >
-          <i className="icon-play me-2"></i> Run
+          Run
         </Button>
       );
     }
@@ -216,9 +219,8 @@ const ActionButton = ({ runState, onClick }: ActionButtonProps) => {
         <Button
           variant="success"
           disabled
-        >
-          <i className="icon-check"></i>
-        </Button>
+          iconProps={{ variant: 'check' }}
+        />
       );
     }
   }

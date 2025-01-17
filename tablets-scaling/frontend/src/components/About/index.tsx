@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { Card } from 'react-bootstrap';
-import { type LinkButtonProps, LinkButton } from '@/components/Button';
+import { LinkButton } from '@/components/Button';
 import mascot from '@/assets/images/scylladb-mascot-cloud.svg';
 
 export const About = (): ReactElement => (
@@ -32,29 +32,33 @@ const Banner = (): ReactElement => (
   </Card>
 );
 
-const linkButtonsProps: readonly LinkButtonProps[] = [
+const linkButtonsProps: readonly {
+  readonly href: string;
+  readonly buttonText: string;
+  readonly iconVariant?: string;
+}[] = [
   {
     href: 'https://www.scylladb.com',
-    label: 'ScyllaDB.com',
+    buttonText: 'ScyllaDB.com',
   },
   {
     href: 'https://docs.scylladb.com',
-    label: 'Documentation',
+    buttonText: 'Documentation',
     iconVariant: 'docs',
   },
   {
     href: 'https://github.com/scylladb',
-    label: 'GitHub',
+    buttonText: 'GitHub',
     iconVariant: 'github',
   },
   {
     href: 'https://twitter.com/scylladb',
-    label: 'X',
+    buttonText: 'X',
     iconVariant: 'x',
   },
   {
     href: 'https://www.linkedin.com/company/scylladb',
-    label: 'LinkedIn',
+    buttonText: 'LinkedIn',
     iconVariant: 'linkedin',
   },
 ];
@@ -65,8 +69,18 @@ const LinkButtons = (): ReactElement => (
       {linkButtonsProps.map((props) => (
         <LinkButton
           key={props.href}
-          {...props}
-        />
+          href={props.href}
+          {...(props.iconVariant
+            ? {
+                iconProps: {
+                  variant: props.iconVariant,
+                  utilClassesString: 'me-1',
+                },
+              }
+            : {})}
+        >
+          {props.buttonText}
+        </LinkButton>
       ))}
     </div>
   </div>
