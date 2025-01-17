@@ -1,10 +1,14 @@
 import type { ReactElement, ReactNode } from 'react';
-import { Icon, type IconProps } from '@/components/Icon';
+import type { IconType } from 'react-icons';
 import {
   Button as BootstrapButton,
   ButtonProps as BootstrapButtonProps,
 } from 'react-bootstrap';
 
+export interface IconProps {
+  readonly Icon: IconType;
+  readonly utilClassesString?: string;
+}
 interface ButtonProps extends BootstrapButtonProps {
   readonly iconProps?: IconProps;
 }
@@ -17,7 +21,15 @@ export const Button = ({
   // @ts-expect-error This works but Bootstrap haven't defined the types to compile with
   // exactOptionalPropertyTypes set to true.
   <BootstrapButton {...bootstrapButtonProps}>
-    {iconProps && <Icon {...iconProps} />}
+    {iconProps?.Icon && (
+      <iconProps.Icon
+        {...(iconProps.utilClassesString
+          ? { className: iconProps.utilClassesString }
+          : {})}
+        style={{ marginTop: -2 }}
+      />
+    )}
+
     {children}
   </BootstrapButton>
 );

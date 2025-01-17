@@ -1,7 +1,8 @@
 import type { ReactElement } from 'react';
 import { Tabs, Tab } from 'react-bootstrap';
+import type { IconType } from 'react-icons';
+import { FaGaugeSimple, FaRocket, FaCircleInfo } from 'react-icons/fa6';
 import { Dashboard } from '@/components/Dashboard';
-import { Icon } from '@/components/Icon';
 import { Scenarios } from '@/components/Scenarios';
 import { About } from '@/components/About';
 
@@ -10,28 +11,28 @@ type Key = 'dashboard' | 'scenarios' | 'about';
 interface SectionTab {
   readonly key: Key;
   readonly title: string;
-  readonly iconVariant: string;
-  readonly component: () => ReactElement;
+  readonly Icon: IconType;
+  readonly Component: () => ReactElement;
 }
 
 const tabs: readonly SectionTab[] = [
   {
     key: 'dashboard',
     title: 'Dashboard',
-    iconVariant: 'dashboard',
-    component: Dashboard,
+    Icon: FaGaugeSimple,
+    Component: Dashboard,
   },
   {
     key: 'scenarios',
     title: 'Scenarios',
-    iconVariant: 'rocket',
-    component: Scenarios,
+    Icon: FaRocket,
+    Component: Scenarios,
   },
   {
     key: 'about',
     title: 'About',
-    iconVariant: 'info',
-    component: About,
+    Icon: FaCircleInfo,
+    Component: About,
   },
 ];
 
@@ -41,17 +42,13 @@ export const TabsLayout = (): ReactElement => (
     id="controlTabs"
     className="nav-tabs nav-fill"
   >
-    {tabs.map(({ key, title, iconVariant, component: Component }) => (
+    {tabs.map(({ key, title, Icon, Component }) => (
       <Tab
         key={key}
         eventKey={key}
         title={
           <>
-            <Icon
-              variant={iconVariant}
-              utilClassesString="me-1"
-            />{' '}
-            {title}
+            <Icon className="me-1" /> {title}
           </>
         }
       >

@@ -1,7 +1,7 @@
 import { type ReactElement, useEffect, useState, useRef } from 'react';
 import { Tabs, Tab } from 'react-bootstrap';
 import { io } from 'socket.io-client';
-import { Icon } from '@/components/Icon';
+import { FaTerminal } from 'react-icons/fa6';
 import { useSocketContext } from '@/context/socket';
 import {
   type GrafanaURLs,
@@ -53,11 +53,7 @@ export const GrafanaContainer = (): ReactElement => {
           eventKey="console"
           title={
             <>
-              <Icon
-                variant="terminal"
-                utilClassesString="me-1"
-              />{' '}
-              Console
+              <FaTerminal className="me-1" /> Console
             </>
           }
         >
