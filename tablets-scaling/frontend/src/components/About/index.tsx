@@ -1,0 +1,93 @@
+import type { ReactElement } from 'react';
+import { Card } from 'react-bootstrap';
+import { LinkButton } from '@/components/Button';
+import mascot from '@/assets/images/scylladb-mascot-cloud.svg';
+
+export const About = (): ReactElement => (
+  <>
+    <Banner />
+    <LinkButtons />
+    <Copyright />
+  </>
+);
+
+const Banner = (): ReactElement => (
+  <Card>
+    <Card.Body className="section-about">
+      <img
+        src={mascot}
+        alt=""
+      />
+
+      <h2>
+        1 million ops/sec <br />
+        ScyllaDB demos with Terraform
+      </h2>
+
+      <p className="lead">
+        Test and benchmark ScyllaDB under a 1 million operations per second
+        workload.
+      </p>
+    </Card.Body>
+  </Card>
+);
+
+const linkButtonsProps: readonly {
+  readonly href: string;
+  readonly buttonText: string;
+  readonly iconVariant?: string;
+}[] = [
+  {
+    href: 'https://www.scylladb.com',
+    buttonText: 'ScyllaDB.com',
+  },
+  {
+    href: 'https://docs.scylladb.com',
+    buttonText: 'Documentation',
+    iconVariant: 'docs',
+  },
+  {
+    href: 'https://github.com/scylladb',
+    buttonText: 'GitHub',
+    iconVariant: 'github',
+  },
+  {
+    href: 'https://twitter.com/scylladb',
+    buttonText: 'X',
+    iconVariant: 'x',
+  },
+  {
+    href: 'https://www.linkedin.com/company/scylladb',
+    buttonText: 'LinkedIn',
+    iconVariant: 'linkedin',
+  },
+];
+
+const LinkButtons = (): ReactElement => (
+  <div className="flex-grow-1">
+    <div className="hstack justify-content-center gap-3 flex-wrap">
+      {linkButtonsProps.map((props) => (
+        <LinkButton
+          key={props.href}
+          href={props.href}
+          {...(props.iconVariant
+            ? {
+                iconProps: {
+                  variant: props.iconVariant,
+                  utilClassesString: 'me-1',
+                },
+              }
+            : {})}
+        >
+          {props.buttonText}
+        </LinkButton>
+      ))}
+    </div>
+  </div>
+);
+
+const Copyright = (): ReactElement => (
+  <div className="border-top pt-3 small text-center">
+    &copy; {new Date().getFullYear()} ScyllaDB. All rights reserved.
+  </div>
+);
