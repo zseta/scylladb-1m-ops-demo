@@ -1,14 +1,9 @@
-import { type ReactElement, type ReactNode, useRef } from 'react';
+import { type ReactElement, useRef } from 'react';
 import type { Socket } from 'socket.io-client';
+import type { ChildrenProps } from '@/util/props';
 import { socketContext } from '@/context/socket';
 
-interface SocketProviderProps {
-  readonly children: ReactNode;
-}
-
-export const SocketProvider = ({
-  children,
-}: SocketProviderProps): ReactElement => {
+export const SocketProvider = ({ children }: ChildrenProps): ReactElement => {
   const socketRef = useRef<Socket | null>(null);
 
   const emitEvent = (eventName: string) => {
