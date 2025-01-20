@@ -9,6 +9,7 @@ import {
   isPlaybookOutput,
   playbookOutputEventKey,
 } from '@/util/api';
+import { TabHeader } from '@/components/TabsLayout';
 
 export const GrafanaContainer = (): ReactElement => {
   const [grafanaUrls, setGrafanaUrls] = useState<GrafanaURLs>({
@@ -52,9 +53,10 @@ export const GrafanaContainer = (): ReactElement => {
         <Tab
           eventKey="console"
           title={
-            <>
-              <FaTerminal className="me-1" /> Console
-            </>
+            <TabHeader
+              title="Console"
+              Icon={FaTerminal}
+            />
           }
         >
           <ConsoleOutput />

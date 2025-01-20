@@ -26,7 +26,7 @@ export const Button = ({
         {...(iconProps.utilClassesString
           ? { className: iconProps.utilClassesString }
           : {})}
-        style={{ marginTop: -2 }}
+        style={{ marginTop: -4 }}
       />
     )}
 

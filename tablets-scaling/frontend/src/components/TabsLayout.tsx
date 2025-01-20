@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import { Tabs, Tab } from 'react-bootstrap';
+import { Tabs, Tab, Stack } from 'react-bootstrap';
 import type { IconType } from 'react-icons';
 import { FaGaugeSimple, FaRocket, FaCircleInfo } from 'react-icons/fa6';
 import { Dashboard } from '@/components/Dashboard';
@@ -47,13 +47,30 @@ export const TabsLayout = (): ReactElement => (
         key={key}
         eventKey={key}
         title={
-          <>
-            <Icon className="me-1" /> {title}
-          </>
+          <TabHeader
+            title={title}
+            Icon={Icon}
+          />
         }
       >
         <Component />
       </Tab>
     ))}
   </Tabs>
+);
+
+interface TabHeaderProps {
+  readonly title: string;
+  readonly Icon: IconType;
+}
+
+export const TabHeader = ({ title, Icon }: TabHeaderProps): ReactElement => (
+  <Stack
+    direction="horizontal"
+    gap={2}
+    className="justify-content-center"
+  >
+    <Icon />
+    <span>{title}</span>
+  </Stack>
 );
