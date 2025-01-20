@@ -1,5 +1,6 @@
 import { type ReactElement, useState } from 'react';
 import { Card } from 'react-bootstrap';
+import { FaPlay, FaStop } from 'react-icons/fa6';
 import { Button } from '@/components/Button';
 import { Slider } from '@/components/Slider';
 import { SectionHeader } from '@/components/SectionHeader';
@@ -67,7 +68,7 @@ export const LoaderProperties = (): ReactElement => {
             <Button
               variant={isRunning ? 'warning' : 'success'}
               iconProps={{
-                variant: isRunning ? 'stop' : 'play',
+                Icon: isRunning ? FaStop : FaPlay,
                 utilClassesString: 'me-2',
               }}
               onClick={() => {

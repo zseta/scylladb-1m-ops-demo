@@ -1,7 +1,7 @@
 import { type ReactElement, useEffect, useState, useRef } from 'react';
 import { Tabs, Tab } from 'react-bootstrap';
 import { io } from 'socket.io-client';
-import { Icon } from '@/components/Icon';
+import { FaTerminal } from 'react-icons/fa6';
 import { useSocketContext } from '@/context/socket';
 import {
   type GrafanaURLs,
@@ -9,6 +9,7 @@ import {
   isPlaybookOutput,
   playbookOutputEventKey,
 } from '@/util/api';
+import { TabHeader } from '@/components/TabsLayout';
 
 export const GrafanaContainer = (): ReactElement => {
   const [grafanaUrls, setGrafanaUrls] = useState<GrafanaURLs>({
@@ -52,13 +53,10 @@ export const GrafanaContainer = (): ReactElement => {
         <Tab
           eventKey="console"
           title={
-            <>
-              <Icon
-                variant="terminal"
-                utilClassesString="me-1"
-              />{' '}
-              Console
-            </>
+            <TabHeader
+              title="Console"
+              Icon={FaTerminal}
+            />
           }
         >
           <ConsoleOutput />

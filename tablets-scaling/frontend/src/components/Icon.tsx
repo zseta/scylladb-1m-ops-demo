@@ -1,8 +1,6 @@
+import type { IconType } from 'react-icons';
+
 export interface IconProps {
-  readonly variant: string;
+  readonly Icon: IconType;
   readonly utilClassesString?: string;
 }
-
-export const Icon = ({ variant, utilClassesString }: IconProps) => (
-  <i className={`icon-${variant} ${utilClassesString ?? ''}`} />
-);

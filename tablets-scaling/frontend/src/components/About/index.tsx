@@ -1,5 +1,7 @@
 import type { ReactElement } from 'react';
 import { Card } from 'react-bootstrap';
+import type { IconType } from 'react-icons';
+import { FaGithub, FaXTwitter, FaLinkedinIn, FaBook } from 'react-icons/fa6';
 import { LinkButton } from '@/components/Button';
 import mascot from '@/assets/images/scylladb-mascot-cloud.svg';
 
@@ -35,7 +37,7 @@ const Banner = (): ReactElement => (
 const linkButtonsProps: readonly {
   readonly href: string;
   readonly buttonText: string;
-  readonly iconVariant?: string;
+  readonly Icon?: IconType;
 }[] = [
   {
     href: 'https://www.scylladb.com',
@@ -44,22 +46,22 @@ const linkButtonsProps: readonly {
   {
     href: 'https://docs.scylladb.com',
     buttonText: 'Documentation',
-    iconVariant: 'docs',
+    Icon: FaBook,
   },
   {
     href: 'https://github.com/scylladb',
     buttonText: 'GitHub',
-    iconVariant: 'github',
+    Icon: FaGithub,
   },
   {
     href: 'https://twitter.com/scylladb',
     buttonText: 'X',
-    iconVariant: 'x',
+    Icon: FaXTwitter,
   },
   {
     href: 'https://www.linkedin.com/company/scylladb',
     buttonText: 'LinkedIn',
-    iconVariant: 'linkedin',
+    Icon: FaLinkedinIn,
   },
 ];
 
@@ -70,10 +72,10 @@ const LinkButtons = (): ReactElement => (
         <LinkButton
           key={props.href}
           href={props.href}
-          {...(props.iconVariant
+          {...(props.Icon
             ? {
                 iconProps: {
-                  variant: props.iconVariant,
+                  Icon: props.Icon,
                   utilClassesString: 'me-1',
                 },
               }
