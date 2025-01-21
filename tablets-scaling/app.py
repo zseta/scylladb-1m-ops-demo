@@ -13,6 +13,10 @@ env = os.environ.copy()
 env["PYTHONUNBUFFERED"] = "1"
 env["ANSIBLE_FORCE_COLOR"] = "1"
 
+program_cwd = os.path.dirname(os.path.abspath(__file__))
+ansible_folder = os.path.join(program_cwd, "ansible")
+data_folder = os.path.join(program_cwd, "frontend/public/data") 
+
 @app.route("/")
 def index():
     try:
@@ -21,6 +25,16 @@ def index():
         abort(404)
     except Exception as e:
         print(f"An error occurred: {e}")
+        return f"Error: {str(e)}", 500
+
+@app.route("/data/<path:filename>")
+def serve_data(filename):
+    try:
+        return send_from_directory(data_folder, filename)
+    except FileNotFoundError:
+        abort(404)
+    except Exception as e:
+        print(f"An error occurred while serving data: {e}")
         return f"Error: {str(e)}", 500
 
 # Global process variable
@@ -78,7 +92,4 @@ def parse_ansible_inventory(inventory_file):
     return inventory
 
 if __name__ == "__main__":
-    program_cwd = os.path.dirname(os.path.abspath(__file__))
-    ansible_folder = os.path.join(program_cwd, "ansible")
-
     socketio.run(app, host='0.0.0.0', port=5000, allow_unsafe_werkzeug=True)

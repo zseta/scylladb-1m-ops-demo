@@ -1,4 +1,10 @@
-import { type ReactElement, useEffect, useState, useRef } from 'react';
+import {
+  type ReactElement,
+  useEffect,
+  useState,
+  useRef,
+  useCallback,
+} from 'react';
 import { Tabs, Tab } from 'react-bootstrap';
 import { io } from 'socket.io-client';
 import { FaTerminal } from 'react-icons/fa6';
@@ -11,14 +17,19 @@ import {
 } from '@/util/api';
 import { TabHeader } from '@/components/TabsLayout';
 
-export const GrafanaContainer = (): ReactElement => {
-  const [grafanaUrls, setGrafanaUrls] = useState<GrafanaURLs>({
-    'Loading Grafana...': '',
-  });
+// This resolves to "<root>/public/data/grafana-urls.json"
+const grafanaUrlsPath = '/data/grafana-urls.json';
 
-  useEffect(() => {
-    // TODO: Define this resource and document its use
-    fetch('../data/grafana_urls.json') // Adjust the path based on where the file is hosted
+export const GrafanaContainer = (): ReactElement => {
+  const [fetchIsPending, setFetchIsPending] = useState(true);
+  const [isFetching, setIsFetching] = useState(false);
+  const [grafanaUrls, setGrafanaUrls] = useState<GrafanaURLs | null>(null);
+
+  const fetchAndSetGrafanaUrls = useCallback(async (): Promise<void> => {
+    setFetchIsPending(false);
+    setIsFetching(true);
+
+    return fetch(grafanaUrlsPath)
       .then((response) => {
         if (!response.ok) {
           throw new Error('Network response was not ok ' + response.statusText);
@@ -39,8 +50,17 @@ export const GrafanaContainer = (): ReactElement => {
       })
       .catch((error: unknown) => {
         console.error('Error fetching grafanaUrls:', error);
+      })
+      .finally(() => {
+        setIsFetching(false);
       });
   }, []);
+
+  useEffect(() => {
+    if (fetchIsPending && !isFetching) {
+      void fetchAndSetGrafanaUrls();
+    }
+  }, [fetchIsPending, isFetching, fetchAndSetGrafanaUrls]);
 
   return (
     <div className="grafana">
@@ -62,18 +82,27 @@ export const GrafanaContainer = (): ReactElement => {
           <ConsoleOutput />
         </Tab>
 
-        {Object.entries(grafanaUrls).map(([key, url]) => (
+        {fetchIsPending || isFetching ? (
           <Tab
-            eventKey={key.toLowerCase()}
-            title={key}
-            key={key}
-          >
-            <iframe
-              src={url}
+            eventKey="loading"
+            title="Loading Grafana..."
+          />
+        ) : grafanaUrls ? (
+          Object.entries(grafanaUrls).map(([key, url]) => (
+            <Tab
+              eventKey={key.toLowerCase()}
               title={key}
-            ></iframe>
-          </Tab>
-        ))}
+              key={key}
+            >
+              <iframe
+                src={url}
+                title={key}
+              ></iframe>
+            </Tab>
+          ))
+        ) : (
+          <></>
+        )}
       </Tabs>
     </div>
   );
