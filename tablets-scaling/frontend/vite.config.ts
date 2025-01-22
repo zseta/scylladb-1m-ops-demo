@@ -11,4 +11,12 @@ export default defineConfig({
       sass: 'sass-embedded',
     },
   },
+  server: {
+    proxy: {
+      '/socket.io': {
+        target: 'ws://localhost:5000',
+        ws: true,
+      },
+    },
+  },
 });

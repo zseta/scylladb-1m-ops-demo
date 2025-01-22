@@ -11,6 +11,7 @@ import { FaTerminal } from 'react-icons/fa6';
 import { useSocketContext } from '@/context/socket';
 import {
   type GrafanaURLs,
+  flaskServerURL,
   isGrafanaUrls,
   isPlaybookOutput,
   playbookOutputEventKey,
@@ -115,7 +116,7 @@ const ConsoleOutput = (): ReactElement => {
 
   // Set up socket connection and listen for playbook output
   useEffect(() => {
-    socketRef.current = io();
+    socketRef.current = io(flaskServerURL);
 
     socketRef.current.on(playbookOutputEventKey, (data: unknown) => {
       if (isPlaybookOutput(data)) {
