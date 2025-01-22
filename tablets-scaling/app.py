@@ -1,5 +1,6 @@
 from flask import Flask, send_from_directory, render_template_string, abort
 from flask_socketio import SocketIO
+from flask_cors import CORS
 import os
 import subprocess
 import configparser
@@ -7,7 +8,8 @@ import configparser
 app = Flask(__name__, 
     static_folder='frontend/dist',
     static_url_path='')
-socketio = SocketIO(app)
+CORS(app) 
+socketio = SocketIO(app, cors_allowed_origins="http://localhost:5173")
 
 env = os.environ.copy()
 env["PYTHONUNBUFFERED"] = "1"

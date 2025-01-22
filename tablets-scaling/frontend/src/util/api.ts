@@ -4,6 +4,8 @@ import {
   objectHasProperty,
 } from '@/util/guard';
 
+export const flaskServerURL = 'http://localhost:5000';
+
 export type ScenarioEventKey =
   | 'original_cluster'
   | 'sample_data'
