@@ -1,4 +1,5 @@
 cd tablets-scaling/frontend
 
-npm run type-check
 npm run lint-staged
+npm run build
+git add dist
